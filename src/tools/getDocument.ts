@@ -2,6 +2,7 @@ import { ErrorCode, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { outlineClient } from '../client.js';
 import { GetDocumentArgs } from '../types.js';
 import { registerTool } from '../utils/listTools.js';
+import { logger } from '../utils/logger.js';
 
 // Register this tool
 registerTool<GetDocumentArgs>({
@@ -23,7 +24,7 @@ registerTool<GetDocumentArgs>({
       const response = await outlineClient.post('/documents.info', { id: args.id });
       return response.data.data;
     } catch (error: any) {
-      console.error('Error getting document:', error.message);
+      logger.error(`Error getting document: ${error.message}`);
       throw new McpError(ErrorCode.InvalidRequest, error.message);
     }
   },

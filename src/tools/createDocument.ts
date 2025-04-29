@@ -2,6 +2,7 @@ import { ErrorCode, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { outlineClient } from '../client.js';
 import { CreateDocumentArgs } from '../types.js';
 import { registerTool } from '../utils/listTools.js';
+import { logger } from '../utils/logger.js';
 
 // Register this tool
 registerTool<CreateDocumentArgs>({
@@ -41,27 +42,27 @@ registerTool<CreateDocumentArgs>({
   handler: async function handleCreateDocument(args: CreateDocumentArgs) {
     try {
       const payload: Record<string, any> = {
-        title: args.title,
-        text: args.text,
-        collectionId: args.collectionId,
+        title: args.title.trim(),
+        collectionId: args.collectionId.trim(),
       };
 
-      if (args.parentDocumentId) {
-        payload.parentDocumentId = args.parentDocumentId;
+      if (args.text && args.text.trim()) {
+        payload.text = args.text.trim();
       }
-
-      if (args.publish !== undefined) {
-        payload.publish = args.publish ?? true;
+      if (args.parentDocumentId && args.parentDocumentId.trim()) {
+        payload.parentDocumentId = args.parentDocumentId.trim();
       }
-
       if (args.template !== undefined) {
         payload.template = args.template;
       }
+      if (args.publish !== undefined) {
+        payload.publish = args.publish;
+      }
 
-      const response = await outlineClient.post('/documents', payload);
+      const response = await outlineClient.post('/documents.create', payload);
       return response.data.data;
     } catch (error: any) {
-      console.error('Error creating document:', error.message);
+      logger.error(`Error creating document: ${error.message}`);
       throw new McpError(ErrorCode.InvalidRequest, error.message);
     }
   },

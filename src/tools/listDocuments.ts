@@ -55,25 +55,37 @@ registerTool<ListDocumentsArgs>({
   },
   handler: async function handleListDocuments(args: ListDocumentsArgs) {
     try {
-      // Create the payload object
-      const payload: Record<string, any> = {
-        offset: args.offset || 1,
-        limit: args.limit || 25,
-        sort: args.sort || 'updatedAt',
-        direction: args.direction || 'DESC',
-        collectionId: args.collectionId || '',
-        userId: args.userId || '',
-        backlinkDocumentId: args.backlinkDocumentId || '',
-        parentDocumentId: args.parentDocumentId || '',
-      };
+      // Create the payload object with only non-null values
+      const payload: Record<string, any> = {};
 
-      // Only add template if it's explicitly defined
-      if (args.template !== undefined) {
+      if (args.offset !== null && args.offset !== undefined) {
+        payload.offset = args.offset;
+      }
+      if (args.limit !== null && args.limit !== undefined) {
+        payload.limit = args.limit;
+      }
+      if (args.sort !== null && args.sort) {
+        payload.sort = args.sort;
+      }
+      if (args.direction !== null && args.direction) {
+        payload.direction = args.direction;
+      }
+      if (args.collectionId !== null && args.collectionId) {
+        payload.collectionId = args.collectionId;
+      }
+      if (args.userId !== null && args.userId) {
+        payload.userId = args.userId;
+      }
+      if (args.backlinkDocumentId !== null && args.backlinkDocumentId) {
+        payload.backlinkDocumentId = args.backlinkDocumentId;
+      }
+      if (args.parentDocumentId !== null && args.parentDocumentId) {
+        payload.parentDocumentId = args.parentDocumentId;
+      }
+      if (args.template !== null && args.template !== undefined) {
         payload.template = args.template;
       }
-
-      // Only add query if it's provided
-      if (args.query) {
+      if (args.query !== null && args.query) {
         payload.query = args.query;
       }
 

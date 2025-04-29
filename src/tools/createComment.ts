@@ -15,7 +15,7 @@ registerTool<CreateCommentArgs>({
       },
       text: {
         type: 'string',
-        description: 'Content of the comment in markdown format',
+        description: 'The body of the comment in markdown',
       },
       parentCommentId: {
         type: 'string',
@@ -23,27 +23,31 @@ registerTool<CreateCommentArgs>({
       },
       data: {
         type: 'object',
-        description: 'Additional data for the comment (optional)',
+        description: 'Additional data for the comment',
       },
     },
-    required: ['documentId', 'text'],
+    required: ['documentId'],
     type: 'object',
   },
   handler: async function handleCreateComment(args: CreateCommentArgs) {
     try {
+      // Start with the minimum required field
       const payload: Record<string, any> = {
-        documentId: args.documentId,
-        text: args.text,
+        documentId: args.documentId.trim(),
       };
 
-      if (args.parentCommentId) {
-        payload.parentCommentId = args.parentCommentId;
+      // Add optional fields only if they have content
+      if (args.text?.trim()) {
+        payload.text = args.text.trim();
       }
-
-      if (args.data) {
+      if (args.parentCommentId?.trim()) {
+        payload.parentCommentId = args.parentCommentId.trim();
+      }
+      if (args.data && Object.keys(args.data).length > 0) {
         payload.data = args.data;
       }
 
+      // Make the request
       const response = await outlineClient.post('/comments.create', payload);
       return response.data.data;
     } catch (error: any) {

@@ -11,15 +11,19 @@ import {
 
 import { registerTools } from './utils/importTools.js';
 import { omit } from 'omit-ts';
+import { logger } from './utils/logger.js';
 
 // Dynamically import all tool files
 const toolDefinitions = await registerTools();
 
-console.log(
-  '\n',
-  `loaded ${Object.keys(toolDefinitions).length} tools`,
-  JSON.stringify(Object.keys(toolDefinitions)),
-  '\n'
+logger.log(
+  JSON.stringify({
+    jsonrpc: '2.0',
+    method: 'log',
+    params: {
+      message: `Loaded ${Object.keys(toolDefinitions).length} tools: ${JSON.stringify(Object.keys(toolDefinitions))}`,
+    },
+  })
 );
 
 const server = new Server(
@@ -76,10 +80,17 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.log('Outline MCP server running on stdio');
 }
 
 main().catch(error => {
-  console.error('Server error:', error);
+  process.stderr.write(
+    JSON.stringify({
+      jsonrpc: '2.0',
+      error: {
+        code: ErrorCode.InternalError,
+        message: error.message,
+      },
+    }) + '\n'
+  );
   process.exit(1);
 });

@@ -2,6 +2,7 @@ import axios from 'axios';
 import { config } from 'dotenv';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { logger } from './utils/logger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 config({ path: join(__dirname, '..', '.env') });
@@ -10,10 +11,19 @@ const API_KEY = process.env.OUTLINE_API_KEY;
 const API_URL = process.env.OUTLINE_API_URL || 'https://app.getoutline.com/api';
 
 if (!API_KEY) {
-  throw new Error('OUTLINE_API_KEY environment variable is required');
+  process.stderr.write(
+    JSON.stringify({
+      jsonrpc: '2.0',
+      error: {
+        code: -32603,
+        message: 'OUTLINE_API_KEY environment variable is required',
+      },
+    }) + '\n'
+  );
+  process.exit(1);
 }
 
-console.log('Connecting to API URL:', API_URL);
+logger.log(`Connecting to API URL: ${API_URL}`);
 
 // Create axios client with authentication
 export const outlineClient = axios.create({
